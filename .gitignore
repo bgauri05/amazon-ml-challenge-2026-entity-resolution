@@ -1,0 +1,17 @@
+# Dataset & Large Archives (exceeds GitHub file size limits)
+*.zip
+*.tsv
+student_resource.zip
+dataset/
+student_resource/student_resource/dataset/
+
+# Python, OS & Mac junk
+__pycache__/
+*.pyc
+.DS_Store
+__MACOSX/
+student_resource/__MACOSX/
+scratch/
+.system_generated/
+.idea/
+.vscode/
