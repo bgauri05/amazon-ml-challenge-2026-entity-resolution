@@ -17,7 +17,12 @@ scratch/
 .vscode/
 
 student_resource/
-
+v5_25k_fixed.log
+v5_50k.log
+v5_retrieval.log
+v5_train.log
+v6_fast.log
+v7_run.log
 
 
 
