@@ -1,0 +1,9 @@
+2026-09-26 22:16:37,553 INFO Loaded 1732544 baseline V1 predictions
+2026-09-26 22:16:38,584 INFO Using existing V8 blend_50, threshold 0.620
+2026-09-26 22:16:38,607 INFO Inference country priority: ['india', 'us', 'france']
+2026-09-26 22:16:39,716 INFO BATCH india 400 records: exact=0.56s ann=0.00s model=0.51s total=1.09s 367.7 rows/s; time_left=200.0min
+2026-09-26 22:16:40,739 INFO BATCH india 400 records: exact=0.51s ann=0.00s model=0.49s total=1.01s 395.6 rows/s; time_left=200.0min
+2026-09-26 22:16:41,751 INFO BATCH india 400 records: exact=0.48s ann=0.00s model=0.52s total=1.01s 396.1 rows/s; time_left=199.9min
+2026-09-26 22:16:42,716 INFO BATCH india 400 records: exact=0.45s ann=0.00s model=0.50s total=0.96s 416.0 rows/s; time_left=199.9min
+2026-09-26 22:16:43,678 INFO BATCH india 400 records: exact=0.45s ann=0.00s model=0.49s total=0.95s 420.6 rows/s; time_left=199.9min
+2026-09-26 22:16:43,689 INFO BENCHMARK COMPLETE: 2000 rows in 5.1s; 393.5 rows/s (includes startup); confident_rows=1489

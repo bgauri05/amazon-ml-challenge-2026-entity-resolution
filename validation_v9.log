@@ -1,0 +1,8 @@
+ML Challenge 2026 — submission validator
+  test dir: student_resource\dataset\test
+  required S1 entities: 1732544
+  matching_results.tsv: 1732544 rows (220140 empty, 1512404 non-empty).
+  candidate_pairs.tsv: 1732544 rows (66035 empty, 1666509 non-empty).
+
+WARNING: ID-existence check is OFF (the default) — not checking that matched/candidate IDs exist in the test set. Every other rule is still checked. Re-run with --check-ids to enable it (needs test_source2/3.tsv; uses more memory). A nonexistent ID only lowers your score, never rejects your submission.
+PASS — no blocking issues found. Safe to submit.

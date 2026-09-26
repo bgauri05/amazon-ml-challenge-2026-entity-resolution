@@ -1,0 +1,13 @@
+2026-09-26 21:42:07,721 INFO Loading existing V7 combined encoder: student_resource\artifacts_v7_fresh\encoder_combined_d64_s60000.joblib
+2026-09-26 21:42:08,767 INFO Loading existing V7 name encoder: student_resource\artifacts_v7_fresh\encoder_name_d64_s60000.joblib
+2026-09-26 21:42:09,479 INFO Loading existing V7 addr encoder: student_resource\artifacts_v7_fresh\encoder_addr_d64_s60000.joblib
+Traceback (most recent call last):
+  File "C:\Users\heerm\projects\amazon-ml-challenge-2026-entity-resolution\model_v8_final.py", line 432, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "C:\Users\heerm\projects\amazon-ml-challenge-2026-entity-resolution\model_v8_final.py", line 431, in main
+    else:test(args)
+         ~~~~^^^^^^
+  File "C:\Users\heerm\projects\amazon-ml-challenge-2026-entity-resolution\model_v8_final.py", line 258, in test
+    raise RuntimeError('TEST data or index configuration changed. Move/delete artifacts_v8_test and output_v8/test_country_progress before rerun.')
+RuntimeError: TEST data or index configuration changed. Move/delete artifacts_v8_test and output_v8/test_country_progress before rerun.

@@ -1,0 +1,166 @@
+2026-09-26 19:28:11,011 INFO Loading existing V7 combined encoder: student_resource\artifacts_v7_fresh\encoder_combined_d64_s60000.joblib
+2026-09-26 19:28:11,716 INFO Loading existing V7 name encoder: student_resource\artifacts_v7_fresh\encoder_name_d64_s60000.joblib
+2026-09-26 19:28:12,034 INFO Loading existing V7 addr encoder: student_resource\artifacts_v7_fresh\encoder_addr_d64_s60000.joblib
+2026-09-26 19:28:12,471 INFO Building TEST combined FAISS and SQLite/FTS (one time)
+2026-09-26 19:28:41,986 INFO Index (2, 'india'): 2312565 records
+2026-09-26 19:28:41,986 INFO Index (2, 'us'): 1871330 records
+2026-09-26 19:28:41,986 INFO Index (2, 'france'): 703378 records
+2026-09-26 19:28:41,986 INFO Index (3, 'india'): 2405000 records
+2026-09-26 19:28:41,986 INFO Index (3, 'us'): 1945701 records
+2026-09-26 19:28:41,986 INFO Index (3, 'france'): 731615 records
+C:\Users\heerm\projects\amazon-ml-challenge-2026-entity-resolution\model_v4_hybrid.py:356: UserWarning: Sparse invariant checks are implicitly disabled. Memory errors (e.g. SEGFAULT) will occur when operating on a sparse tensor which violates the invariants, but checks incur performance overhead. To silence this warning, explicitly opt in or out. See `torch.sparse.check_sparse_tensor_invariants.__doc__` for guidance.  (Triggered internally at C:\actions-runner\_work\pytorch\pytorch\pytorch\aten\src\ATen\Context.cpp:767.)
+  torch.sparse_coo_tensor(
+2026-09-26 19:29:52,673 INFO Source 2 indexed 200000
+2026-09-26 19:31:13,019 INFO Source 2 indexed 400000
+2026-09-26 19:31:54,259 INFO Source 2 indexed 600000
+2026-09-26 19:32:36,987 INFO Source 2 indexed 800000
+2026-09-26 19:33:20,123 INFO Source 2 indexed 1000000
+2026-09-26 19:34:03,596 INFO Source 2 indexed 1200000
+2026-09-26 19:34:47,601 INFO Source 2 indexed 1400000
+2026-09-26 19:35:32,133 INFO Source 2 indexed 1600000
+2026-09-26 19:36:16,842 INFO Source 2 indexed 1800000
+2026-09-26 19:37:01,149 INFO Source 2 indexed 2000000
+2026-09-26 19:37:46,604 INFO Source 2 indexed 2200000
+2026-09-26 19:38:32,783 INFO Source 2 indexed 2400000
+2026-09-26 19:39:18,873 INFO Source 2 indexed 2600000
+2026-09-26 19:40:04,821 INFO Source 2 indexed 2800000
+2026-09-26 19:40:50,979 INFO Source 2 indexed 3000000
+2026-09-26 19:41:37,280 INFO Source 2 indexed 3200000
+2026-09-26 19:42:24,419 INFO Source 2 indexed 3400000
+2026-09-26 19:43:11,860 INFO Source 2 indexed 3600000
+2026-09-26 19:43:59,661 INFO Source 2 indexed 3800000
+2026-09-26 19:44:47,568 INFO Source 2 indexed 4000000
+2026-09-26 19:45:35,630 INFO Source 2 indexed 4200000
+2026-09-26 19:46:23,756 INFO Source 2 indexed 4400000
+2026-09-26 19:47:11,905 INFO Source 2 indexed 4600000
+2026-09-26 19:48:00,431 INFO Source 2 indexed 4800000
+2026-09-26 19:48:58,601 INFO Source 3 indexed 200000
+2026-09-26 19:49:38,260 INFO Source 3 indexed 400000
+2026-09-26 19:50:19,345 INFO Source 3 indexed 600000
+2026-09-26 19:51:00,982 INFO Source 3 indexed 800000
+2026-09-26 19:51:43,346 INFO Source 3 indexed 1000000
+2026-09-26 19:52:26,545 INFO Source 3 indexed 1200000
+2026-09-26 19:53:09,941 INFO Source 3 indexed 1400000
+2026-09-26 19:53:53,641 INFO Source 3 indexed 1600000
+2026-09-26 19:54:37,983 INFO Source 3 indexed 1800000
+2026-09-26 19:55:21,845 INFO Source 3 indexed 2000000
+2026-09-26 19:56:06,757 INFO Source 3 indexed 2200000
+2026-09-26 19:56:52,096 INFO Source 3 indexed 2400000
+2026-09-26 19:57:37,772 INFO Source 3 indexed 2600000
+2026-09-26 19:58:23,290 INFO Source 3 indexed 2800000
+2026-09-26 19:59:50,024 INFO Source 3 indexed 3000000
+2026-09-26 20:00:40,034 INFO Source 3 indexed 3200000
+2026-09-26 20:01:42,816 INFO Source 3 indexed 3400000
+2026-09-26 20:02:45,762 INFO Source 3 indexed 3600000
+2026-09-26 20:03:48,633 INFO Source 3 indexed 3800000
+2026-09-26 20:04:51,531 INFO Source 3 indexed 4000000
+2026-09-26 20:06:33,974 INFO Source 3 indexed 4200000
+2026-09-26 20:08:23,162 INFO Source 3 indexed 4400000
+2026-09-26 20:10:14,002 INFO Source 3 indexed 4600000
+2026-09-26 20:12:06,151 INFO Source 3 indexed 4800000
+2026-09-26 20:13:56,950 INFO Source 3 indexed 5000000
+2026-09-26 20:14:43,520 INFO Building SQLite exact-match indexes
+2026-09-26 20:16:12,383 INFO Building name/address FTS5 indexes (one-time; may take a while)
+2026-09-26 20:16:32,964 INFO FTS indexed 1000000 target records
+2026-09-26 20:16:55,277 INFO FTS indexed 2000000 target records
+2026-09-26 20:17:18,651 INFO FTS indexed 3000000 target records
+2026-09-26 20:17:41,736 INFO FTS indexed 4000000 target records
+2026-09-26 20:18:06,419 INFO FTS indexed 5000000 target records
+2026-09-26 20:18:39,433 INFO FTS indexed 6000000 target records
+2026-09-26 20:19:02,721 INFO FTS indexed 7000000 target records
+2026-09-26 20:19:26,228 INFO FTS indexed 8000000 target records
+2026-09-26 20:19:50,809 INFO FTS indexed 9000000 target records
+2026-09-26 20:20:35,310 INFO FTS5 ready (9969589 indexed records)
+2026-09-26 20:26:33,029 INFO Saved reusable FAISS indexes and metadata
+2026-09-26 20:26:33,941 INFO Building TEST name/address FAISS for S2
+2026-09-26 20:27:21,721 INFO TEST source 2 field indexed 200000
+2026-09-26 20:28:09,293 INFO TEST source 2 field indexed 400000
+2026-09-26 20:28:58,099 INFO TEST source 2 field indexed 600000
+2026-09-26 20:29:47,500 INFO TEST source 2 field indexed 800000
+2026-09-26 20:30:38,368 INFO TEST source 2 field indexed 1000000
+2026-09-26 20:31:28,746 INFO TEST source 2 field indexed 1200000
+2026-09-26 20:32:19,124 INFO TEST source 2 field indexed 1400000
+2026-09-26 20:33:10,249 INFO TEST source 2 field indexed 1600000
+2026-09-26 20:34:01,384 INFO TEST source 2 field indexed 1800000
+2026-09-26 20:34:52,511 INFO TEST source 2 field indexed 2000000
+2026-09-26 20:35:43,747 INFO TEST source 2 field indexed 2200000
+2026-09-26 20:36:35,621 INFO TEST source 2 field indexed 2400000
+2026-09-26 20:37:28,133 INFO TEST source 2 field indexed 2600000
+2026-09-26 20:38:40,740 INFO TEST source 2 field indexed 2800000
+2026-09-26 20:40:12,875 INFO TEST source 2 field indexed 3000000
+2026-09-26 20:41:33,131 INFO TEST source 2 field indexed 3200000
+2026-09-26 20:42:26,539 INFO TEST source 2 field indexed 3400000
+2026-09-26 20:43:20,645 INFO TEST source 2 field indexed 3600000
+2026-09-26 20:44:14,525 INFO TEST source 2 field indexed 3800000
+2026-09-26 20:45:09,407 INFO TEST source 2 field indexed 4000000
+2026-09-26 20:46:03,112 INFO TEST source 2 field indexed 4200000
+2026-09-26 20:46:57,265 INFO TEST source 2 field indexed 4400000
+2026-09-26 20:48:12,473 INFO TEST source 2 field indexed 4600000
+2026-09-26 20:49:47,769 INFO TEST source 2 field indexed 4800000
+2026-09-26 20:50:58,395 INFO TEST field indexes for S2 complete
+2026-09-26 20:50:58,396 INFO Building TEST name/address FAISS for S3
+2026-09-26 20:52:18,016 INFO TEST source 3 field indexed 200000
+2026-09-26 20:53:38,095 INFO TEST source 3 field indexed 400000
+2026-09-26 20:55:00,116 INFO TEST source 3 field indexed 600000
+2026-09-26 20:56:23,963 INFO TEST source 3 field indexed 800000
+2026-09-26 20:57:16,220 INFO TEST source 3 field indexed 1000000
+2026-09-26 20:58:04,816 INFO TEST source 3 field indexed 1200000
+2026-09-26 20:58:53,273 INFO TEST source 3 field indexed 1400000
+2026-09-26 20:59:42,138 INFO TEST source 3 field indexed 1600000
+2026-09-26 21:00:31,695 INFO TEST source 3 field indexed 1800000
+2026-09-26 21:01:51,618 INFO TEST source 3 field indexed 2000000
+2026-09-26 21:03:17,877 INFO TEST source 3 field indexed 2200000
+2026-09-26 21:04:45,298 INFO TEST source 3 field indexed 2400000
+2026-09-26 21:05:53,687 INFO TEST source 3 field indexed 2600000
+2026-09-26 21:06:45,580 INFO TEST source 3 field indexed 2800000
+2026-09-26 21:07:37,617 INFO TEST source 3 field indexed 3000000
+2026-09-26 21:08:29,459 INFO TEST source 3 field indexed 3200000
+2026-09-26 21:09:21,539 INFO TEST source 3 field indexed 3400000
+2026-09-26 21:10:45,027 INFO TEST source 3 field indexed 3600000
+2026-09-26 21:12:17,548 INFO TEST source 3 field indexed 3800000
+2026-09-26 21:13:49,993 INFO TEST source 3 field indexed 4000000
+2026-09-26 21:15:20,436 INFO TEST source 3 field indexed 4200000
+2026-09-26 21:16:52,842 INFO TEST source 3 field indexed 4400000
+2026-09-26 21:18:25,704 INFO TEST source 3 field indexed 4600000
+2026-09-26 21:20:02,460 INFO TEST source 3 field indexed 4800000
+2026-09-26 21:21:38,294 INFO TEST source 3 field indexed 5000000
+2026-09-26 21:22:48,413 INFO TEST field indexes for S3 complete
+2026-09-26 21:23:59,931 INFO Test S1 partitioned by country: {'us': 663106, 'france': 259452, 'india': 809986}
+2026-09-26 21:24:01,219 INFO Loaded V8 configuration: blend_50 | primary=v8_precision.json | blend_weight=0.50
+2026-09-26 21:24:03,572 INFO Loaded fresh V7 combined/name/address indexes: source 2 country france
+2026-09-26 21:24:05,888 INFO Loaded fresh V7 combined/name/address indexes: source 3 country france
+2026-09-26 21:38:54,707 INFO TEST france 1000/259452
+2026-09-26 22:00:19,760 INFO TEST france 2000/259452
+2026-09-26 22:21:17,418 INFO TEST france 3000/259452
+2026-09-26 22:33:50,785 INFO TEST france 4000/259452
+Traceback (most recent call last):
+  File "C:\Users\heerm\projects\amazon-ml-challenge-2026-entity-resolution\model_v8_final.py", line 432, in <module>
+    if __name__=='__main__':main()
+                            ~~~~^^
+  File "C:\Users\heerm\projects\amazon-ml-challenge-2026-entity-resolution\model_v8_final.py", line 431, in main
+    else:test(args)
+         ~~~~^^^^^^
+  File "C:\Users\heerm\projects\amazon-ml-challenge-2026-entity-resolution\model_v8_final.py", line 364, in test
+    feats.append(v6.extra_features(r,targets[cid],sim));ids.append(cid)
+                 ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\heerm\projects\amazon-ml-challenge-2026-entity-resolution\model_v6_fast.py", line 123, in extra_features
+    f = v5_features(a, b, similarity)
+  File "C:\Users\heerm\projects\amazon-ml-challenge-2026-entity-resolution\model_v6_fast.py", line 62, in v5_features
+    f = BASE_FEATURES(a, b, similarity)
+  File "C:\Users\heerm\projects\amazon-ml-challenge-2026-entity-resolution\model_v4_hybrid.py", line 990, in features
+    fuzz.partial_ratio(name_key(an),name_key(bn))/100,
+                                    ~~~~~~~~^^^^
+  File "C:\Users\heerm\projects\amazon-ml-challenge-2026-entity-resolution\model_v4_hybrid.py", line 143, in name_key
+    words = norm(s).split()
+            ~~~~^^^
+  File "C:\Users\heerm\projects\amazon-ml-challenge-2026-entity-resolution\model_v4_hybrid.py", line 126, in norm
+    s = re.sub(
+        r"[^\w\s]",
+        " ",
+        s
+    )
+  File "C:\Python313\Lib\re\__init__.py", line 208, in sub
+    return _compile(pattern, flags).sub(repl, string, count)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt
+^C
