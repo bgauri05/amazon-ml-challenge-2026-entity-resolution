@@ -25,12 +25,15 @@ student_resource/
 *.parquet
 *.joblib
 *.sqlite
-approach_v2_blocking/candidates/
+approach_v2_blocking/candidates/*
+!approach_v2_blocking/candidates/test_1k_candidates*.parquet
 approach_v2_blocking/indexes/
 approach_v2_blocking/features/
 approach_v2_blocking/models/
 approach_v2_blocking/outputs/
 approach_v2_blocking/data/
+
+
 
 
 
