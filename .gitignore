@@ -17,12 +17,21 @@ scratch/
 .vscode/
 
 student_resource/
-v5_25k_fixed.log
-v5_50k.log
-v5_retrieval.log
-v5_train.log
-v6_fast.log
-v7_run.log
+*.log
+.venv/
+
+# Database, candidate & cached model files
+*.db
+*.parquet
+*.joblib
+*.sqlite
+approach_v2_blocking/candidates/
+approach_v2_blocking/indexes/
+approach_v2_blocking/features/
+approach_v2_blocking/models/
+approach_v2_blocking/outputs/
+approach_v2_blocking/data/
+
 
 
 

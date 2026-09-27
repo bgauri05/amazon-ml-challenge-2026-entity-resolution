@@ -1,0 +1,520 @@
+{
+  "summary": {
+    "total_s1_entities_evaluated": 1000,
+    "s1_entities_with_zero_gt_matches": 54,
+    "s1_entities_with_active_gt_matches": 946,
+    "total_gt_positive_matches": 3517,
+    "total_gt_matches_retrieved": 2086,
+    "overall_candidate_recall_pct": 59.31,
+    "entity_recall_breakdown": {
+      "all_gt_matches_retrieved_count": 286,
+      "all_gt_matches_retrieved_pct": 30.23,
+      "partial_gt_matches_retrieved_count": 524,
+      "partial_gt_matches_retrieved_pct": 55.39,
+      "zero_gt_matches_retrieved_count": 136,
+      "zero_gt_matches_retrieved_pct": 14.38
+    }
+  },
+  "per_blocking_pass": {
+    "exact_name": {
+      "retrieved_gt_links": 1316,
+      "recall_pct": 37.42,
+      "s1_entities_with_at_least_one_true_match": 701,
+      "s1_entities_pct": 74.1
+    },
+    "name_token": {
+      "retrieved_gt_links": 1021,
+      "recall_pct": 29.03,
+      "s1_entities_with_at_least_one_true_match": 341,
+      "s1_entities_pct": 36.05
+    },
+    "address_token": {
+      "retrieved_gt_links": 1418,
+      "recall_pct": 40.32,
+      "s1_entities_with_at_least_one_true_match": 549,
+      "s1_entities_pct": 58.03
+    },
+    "name_prefix": {
+      "retrieved_gt_links": 294,
+      "recall_pct": 8.36,
+      "s1_entities_with_at_least_one_true_match": 97,
+      "s1_entities_pct": 10.25
+    }
+  },
+  "union_all_passes": {
+    "total_gt_retrieved": 2086,
+    "overall_recall_pct": 59.31,
+    "s1_entities_with_at_least_one_true_match": 810,
+    "s1_entities_pct": 85.62
+  },
+  "recommendation": {
+    "verdict": "B) TUNED BEFORE SCALING",
+    "rationale": "The current 4-pass blocking pipeline achieves 59.31% candidate recall on the 1,000-entity test set. Because 40.69% of true positive links are lost at the candidate generation phase, any downstream ranker or classifier would be strictly bounded to a maximum possible recall of < 60%. Therefore, blocking MUST BE TUNED (e.g. adding n-gram fuzzy matching, address city/postal code keys, and optimizing token thresholds) to push recall above 85-90% BEFORE scaling up to the full 2.2M dataset."
+  },
+  "qualitative_examples": {
+    "full_recall_examples": [
+      {
+        "s1_entity_id": "S1-785847572",
+        "ground_truth_count": 4,
+        "retrieved_count": 4,
+        "ground_truth_matches": [
+          "S2-682432196",
+          "S3-145991649",
+          "S3-943437724",
+          "S3-948163592"
+        ],
+        "retrieved_true_matches": [
+          "S2-682432196",
+          "S3-145991649",
+          "S3-943437724",
+          "S3-948163592"
+        ],
+        "missed_true_matches": [],
+        "generated_candidates": [
+          {
+            "candidate_entity_id": "S2-682432196",
+            "blocking_passes": "address_token,exact_name,name_token"
+          },
+          {
+            "candidate_entity_id": "S3-145991649",
+            "blocking_passes": "address_token,exact_name,name_token"
+          },
+          {
+            "candidate_entity_id": "S3-943437724",
+            "blocking_passes": "address_token,exact_name,name_token"
+          },
+          {
+            "candidate_entity_id": "S3-948163592",
+            "blocking_passes": "address_token,exact_name,name_token"
+          },
+          {
+            "candidate_entity_id": "S2-136041364",
+            "blocking_passes": "address_token,name_token"
+          },
+          {
+            "candidate_entity_id": "S2-164190611",
+            "blocking_passes": "exact_name,name_token"
+          },
+          {
+            "candidate_entity_id": "S2-316187589",
+            "blocking_passes": "exact_name,name_token"
+          },
+          {
+            "candidate_entity_id": "S2-32046115",
+            "blocking_passes": "exact_name,name_token"
+          },
+          {
+            "candidate_entity_id": "S2-395389219",
+            "blocking_passes": "exact_name,name_token"
+          },
+          {
+            "candidate_entity_id": "S2-514277460",
+            "blocking_passes": "exact_name,name_token"
+          }
+        ]
+      },
+      {
+        "s1_entity_id": "S1-236312382",
+        "ground_truth_count": 3,
+        "retrieved_count": 3,
+        "ground_truth_matches": [
+          "S2-69010626",
+          "S2-734049056",
+          "S3-591515133"
+        ],
+        "retrieved_true_matches": [
+          "S2-69010626",
+          "S2-734049056",
+          "S3-591515133"
+        ],
+        "missed_true_matches": [],
+        "generated_candidates": [
+          {
+            "candidate_entity_id": "S3-312994211",
+            "blocking_passes": "address_token,exact_name"
+          },
+          {
+            "candidate_entity_id": "S3-591515133",
+            "blocking_passes": "address_token,exact_name"
+          },
+          {
+            "candidate_entity_id": "S2-1046604",
+            "blocking_passes": "address_token"
+          },
+          {
+            "candidate_entity_id": "S2-13918588",
+            "blocking_passes": "address_token"
+          },
+          {
+            "candidate_entity_id": "S2-192806417",
+            "blocking_passes": "address_token"
+          },
+          {
+            "candidate_entity_id": "S2-196264504",
+            "blocking_passes": "address_token"
+          },
+          {
+            "candidate_entity_id": "S2-230778440",
+            "blocking_passes": "address_token"
+          },
+          {
+            "candidate_entity_id": "S2-300084472",
+            "blocking_passes": "address_token"
+          },
+          {
+            "candidate_entity_id": "S2-312398157",
+            "blocking_passes": "address_token"
+          },
+          {
+            "candidate_entity_id": "S2-316446934",
+            "blocking_passes": "address_token"
+          }
+        ]
+      },
+      {
+        "s1_entity_id": "S1-221443075",
+        "ground_truth_count": 3,
+        "retrieved_count": 3,
+        "ground_truth_matches": [
+          "S2-804818360",
+          "S2-861061618",
+          "S3-815125209"
+        ],
+        "retrieved_true_matches": [
+          "S2-804818360",
+          "S2-861061618",
+          "S3-815125209"
+        ],
+        "missed_true_matches": [],
+        "generated_candidates": [
+          {
+            "candidate_entity_id": "S2-861061618",
+            "blocking_passes": "address_token,exact_name,name_token"
+          },
+          {
+            "candidate_entity_id": "S3-815125209",
+            "blocking_passes": "address_token,exact_name,name_token"
+          },
+          {
+            "candidate_entity_id": "S2-714940776",
+            "blocking_passes": "exact_name,name_token"
+          },
+          {
+            "candidate_entity_id": "S2-804818360",
+            "blocking_passes": "address_token,name_token"
+          },
+          {
+            "candidate_entity_id": "S2-918961068",
+            "blocking_passes": "exact_name,name_token"
+          },
+          {
+            "candidate_entity_id": "S3-795349514",
+            "blocking_passes": "address_token,name_token"
+          },
+          {
+            "candidate_entity_id": "S3-941964350",
+            "blocking_passes": "exact_name,name_token"
+          },
+          {
+            "candidate_entity_id": "S2-103570265",
+            "blocking_passes": "address_token"
+          },
+          {
+            "candidate_entity_id": "S2-107949468",
+            "blocking_passes": "name_token"
+          },
+          {
+            "candidate_entity_id": "S2-110343205",
+            "blocking_passes": "address_token"
+          }
+        ]
+      }
+    ],
+    "partial_recall_examples": [
+      {
+        "s1_entity_id": "S1-925783039",
+        "ground_truth_count": 4,
+        "retrieved_count": 3,
+        "ground_truth_matches": [
+          "S2-157377754",
+          "S2-517291332",
+          "S3-698172821",
+          "S3-997698194"
+        ],
+        "retrieved_true_matches": [
+          "S2-157377754",
+          "S2-517291332",
+          "S3-997698194"
+        ],
+        "missed_true_matches": [
+          "S3-698172821"
+        ],
+        "generated_candidates": [
+          {
+            "candidate_entity_id": "S2-157377754",
+            "blocking_passes": "address_token,exact_name,name_token"
+          },
+          {
+            "candidate_entity_id": "S3-997698194",
+            "blocking_passes": "address_token,exact_name,name_token"
+          },
+          {
+            "candidate_entity_id": "S2-517291332",
+            "blocking_passes": "address_token,name_token"
+          },
+          {
+            "candidate_entity_id": "S2-100198226",
+            "blocking_passes": "name_token"
+          },
+          {
+            "candidate_entity_id": "S2-109148193",
+            "blocking_passes": "address_token"
+          },
+          {
+            "candidate_entity_id": "S2-110234581",
+            "blocking_passes": "name_token"
+          },
+          {
+            "candidate_entity_id": "S2-122631610",
+            "blocking_passes": "name_token"
+          },
+          {
+            "candidate_entity_id": "S2-125519010",
+            "blocking_passes": "address_token"
+          },
+          {
+            "candidate_entity_id": "S2-128767286",
+            "blocking_passes": "address_token"
+          },
+          {
+            "candidate_entity_id": "S2-132553762",
+            "blocking_passes": "address_token"
+          }
+        ]
+      },
+      {
+        "s1_entity_id": "S1-773889195",
+        "ground_truth_count": 6,
+        "retrieved_count": 5,
+        "ground_truth_matches": [
+          "S2-374107005",
+          "S2-970528089",
+          "S3-161452820",
+          "S3-189140669",
+          "S3-202893869",
+          "S3-622232873"
+        ],
+        "retrieved_true_matches": [
+          "S2-374107005",
+          "S3-161452820",
+          "S3-189140669",
+          "S3-202893869",
+          "S3-622232873"
+        ],
+        "missed_true_matches": [
+          "S2-970528089"
+        ],
+        "generated_candidates": [
+          {
+            "candidate_entity_id": "S3-161452820",
+            "blocking_passes": "address_token,exact_name"
+          },
+          {
+            "candidate_entity_id": "S3-189140669",
+            "blocking_passes": "address_token,exact_name"
+          },
+          {
+            "candidate_entity_id": "S3-622232873",
+            "blocking_passes": "address_token,exact_name"
+          },
+          {
+            "candidate_entity_id": "S2-101629612",
+            "blocking_passes": "address_token"
+          },
+          {
+            "candidate_entity_id": "S2-115549519",
+            "blocking_passes": "address_token"
+          },
+          {
+            "candidate_entity_id": "S2-133154141",
+            "blocking_passes": "address_token"
+          },
+          {
+            "candidate_entity_id": "S2-213675987",
+            "blocking_passes": "address_token"
+          },
+          {
+            "candidate_entity_id": "S2-229081592",
+            "blocking_passes": "address_token"
+          },
+          {
+            "candidate_entity_id": "S2-258632896",
+            "blocking_passes": "address_token"
+          },
+          {
+            "candidate_entity_id": "S2-374107005",
+            "blocking_passes": "exact_name"
+          }
+        ]
+      },
+      {
+        "s1_entity_id": "S1-377745466",
+        "ground_truth_count": 4,
+        "retrieved_count": 3,
+        "ground_truth_matches": [
+          "S2-203037501",
+          "S3-402918963",
+          "S3-70942743",
+          "S3-836170816"
+        ],
+        "retrieved_true_matches": [
+          "S2-203037501",
+          "S3-402918963",
+          "S3-836170816"
+        ],
+        "missed_true_matches": [
+          "S3-70942743"
+        ],
+        "generated_candidates": [
+          {
+            "candidate_entity_id": "S2-203037501",
+            "blocking_passes": "address_token,exact_name,name_prefix"
+          },
+          {
+            "candidate_entity_id": "S2-144682432",
+            "blocking_passes": "exact_name,name_prefix"
+          },
+          {
+            "candidate_entity_id": "S3-210453584",
+            "blocking_passes": "exact_name,name_prefix"
+          },
+          {
+            "candidate_entity_id": "S3-402918963",
+            "blocking_passes": "address_token,name_prefix"
+          },
+          {
+            "candidate_entity_id": "S3-569058042",
+            "blocking_passes": "exact_name,name_prefix"
+          },
+          {
+            "candidate_entity_id": "S3-782681980",
+            "blocking_passes": "exact_name,name_prefix"
+          },
+          {
+            "candidate_entity_id": "S3-836170816",
+            "blocking_passes": "address_token,name_prefix"
+          },
+          {
+            "candidate_entity_id": "S2-110292671",
+            "blocking_passes": "address_token"
+          },
+          {
+            "candidate_entity_id": "S2-114172085",
+            "blocking_passes": "address_token"
+          },
+          {
+            "candidate_entity_id": "S2-12320431",
+            "blocking_passes": "address_token"
+          }
+        ]
+      }
+    ],
+    "zero_recall_examples": [
+      {
+        "s1_entity_id": "S1-865131206",
+        "ground_truth_count": 4,
+        "retrieved_count": 0,
+        "ground_truth_matches": [
+          "S2-657355663",
+          "S3-219374335",
+          "S3-567734078",
+          "S3-652513823"
+        ],
+        "retrieved_true_matches": [],
+        "missed_true_matches": [
+          "S2-657355663",
+          "S3-219374335",
+          "S3-567734078",
+          "S3-652513823"
+        ],
+        "generated_candidates": []
+      },
+      {
+        "s1_entity_id": "S1-626914593",
+        "ground_truth_count": 2,
+        "retrieved_count": 0,
+        "ground_truth_matches": [
+          "S2-563003232",
+          "S3-594660686"
+        ],
+        "retrieved_true_matches": [],
+        "missed_true_matches": [
+          "S2-563003232",
+          "S3-594660686"
+        ],
+        "generated_candidates": [
+          {
+            "candidate_entity_id": "S2-958632358",
+            "blocking_passes": "exact_name"
+          }
+        ]
+      },
+      {
+        "s1_entity_id": "S1-82053739",
+        "ground_truth_count": 2,
+        "retrieved_count": 0,
+        "ground_truth_matches": [
+          "S3-250737963",
+          "S3-618834296"
+        ],
+        "retrieved_true_matches": [],
+        "missed_true_matches": [
+          "S3-250737963",
+          "S3-618834296"
+        ],
+        "generated_candidates": [
+          {
+            "candidate_entity_id": "S2-105539007",
+            "blocking_passes": "exact_name"
+          },
+          {
+            "candidate_entity_id": "S2-132487159",
+            "blocking_passes": "exact_name"
+          },
+          {
+            "candidate_entity_id": "S2-147697006",
+            "blocking_passes": "exact_name"
+          },
+          {
+            "candidate_entity_id": "S2-26333718",
+            "blocking_passes": "exact_name"
+          },
+          {
+            "candidate_entity_id": "S2-464603395",
+            "blocking_passes": "exact_name"
+          },
+          {
+            "candidate_entity_id": "S2-517189142",
+            "blocking_passes": "exact_name"
+          },
+          {
+            "candidate_entity_id": "S2-667261138",
+            "blocking_passes": "exact_name"
+          },
+          {
+            "candidate_entity_id": "S2-682195117",
+            "blocking_passes": "exact_name"
+          },
+          {
+            "candidate_entity_id": "S2-714342565",
+            "blocking_passes": "exact_name"
+          },
+          {
+            "candidate_entity_id": "S2-827657307",
+            "blocking_passes": "exact_name"
+          }
+        ]
+      }
+    ]
+  }
+}

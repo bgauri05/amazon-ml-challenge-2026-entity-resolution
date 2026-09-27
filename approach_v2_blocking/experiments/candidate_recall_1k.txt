@@ -1,0 +1,57 @@
+================================================================================
+APPROACH V2: CANDIDATE RECALL EVALUATION REPORT (1,000 S1 ENTITIES)
+================================================================================
+
+1. OVERALL METRICS:
+  - Total S1 Entities Evaluated          : 1,000
+  - S1 Entities with 0 GT Matches        : 54 (5.4%)
+  - S1 Entities with >=1 GT Matches      : 946
+  - Total Ground-Truth Positive Matches  : 3,517
+  - Total GT Matches Retrieved (Union)   : 2,086
+  - OVERALL CANDIDATE RECALL %           : 59.31%
+
+2. ENTITY-LEVEL RECALL BREAKDOWN (for S1 with >=1 GT link):
+  - ALL GT Matches Retrieved (Complete) : 286 entities (30.23%)
+  - PARTIAL GT Matches Retrieved        : 524 entities (55.39%)
+  - ZERO GT Matches Retrieved           : 136 entities (14.38%)
+
+3. PER-BLOCKING-PASS METRICS:
+  - Union of All Four Passes            : 2,086 / 3,517 links (59.31%) | 810 S1 entities
+  - Rule [exact_name     ]          : 1,316 / 3,517 links (37.42%) | 701 S1 entities (74.1%)
+  - Rule [name_token     ]          : 1,021 / 3,517 links (29.03%) | 341 S1 entities (36.05%)
+  - Rule [address_token  ]          : 1,418 / 3,517 links (40.32%) | 549 S1 entities (58.03%)
+  - Rule [name_prefix    ]          : 294 / 3,517 links (8.36%) | 97 S1 entities (10.25%)
+
+4. QUALITATIVE FAILED / SUCCESS EXAMPLES:
+
+--- [A] FULL RECALL EXAMPLE (100% Matches Retrieved) ---
+S1 Entity ID : S1-785847572
+GT Matches   : ['S2-682432196', 'S3-145991649', 'S3-943437724', 'S3-948163592']
+Generated Candidates (Top 5):
+  - S2-682432196 (Passes: address_token,exact_name,name_token)
+  - S3-145991649 (Passes: address_token,exact_name,name_token)
+  - S3-943437724 (Passes: address_token,exact_name,name_token)
+  - S3-948163592 (Passes: address_token,exact_name,name_token)
+  - S2-136041364 (Passes: address_token,name_token)
+
+--- [B] PARTIAL RECALL EXAMPLE (Some Matches Missed) ---
+S1 Entity ID : S1-925783039
+GT Matches   : ['S2-157377754', 'S2-517291332', 'S3-698172821', 'S3-997698194']
+Retrieved    : ['S2-157377754', 'S2-517291332', 'S3-997698194']
+Missed       : ['S3-698172821']
+Generated Candidates (Top 5):
+  - S2-157377754 (Passes: address_token,exact_name,name_token)
+  - S3-997698194 (Passes: address_token,exact_name,name_token)
+  - S2-517291332 (Passes: address_token,name_token)
+  - S2-100198226 (Passes: name_token)
+  - S2-109148193 (Passes: address_token)
+
+--- [C] ZERO RECALL EXAMPLE (All True Matches Missed) ---
+S1 Entity ID : S1-865131206
+GT Matches   : ['S2-657355663', 'S3-219374335', 'S3-567734078', 'S3-652513823']
+Generated Candidates (Top 5):
+
+================================================================================
+RECOMMENDATION: B) TUNED BEFORE SCALING
+Rationale: The current 4-pass blocking pipeline achieves 59.31% candidate recall on the 1,000-entity test set. Because 40.69% of true positive links are lost at the candidate generation phase, any downstream ranker or classifier would be strictly bounded to a maximum possible recall of < 60%. Therefore, blocking MUST BE TUNED (e.g. adding n-gram fuzzy matching, address city/postal code keys, and optimizing token thresholds) to push recall above 85-90% BEFORE scaling up to the full 2.2M dataset.
+================================================================================

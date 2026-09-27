@@ -74,7 +74,7 @@ def score_validation(valid, candidates, store, model, query_batch):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('--data', type=Path, default=Path('student_resource/dataset'))
+    p.add_argument('--data', type=Path, default=Path('student_resource/student_resource/dataset'))
     p.add_argument('--train-size', type=int, default=50000,
                    help='TOTAL training references, including the original 8000')
     p.add_argument('--top-k', type=int, default=40)
@@ -90,6 +90,10 @@ def main():
     p.add_argument('--mining-per-entity', type=int, default=10)
     p.add_argument('--skip-mining', action='store_true')
     args = p.parse_args()
+    if not (args.data / 'train' / 'train_ground_truth.tsv').exists():
+        fallback = Path('student_resource/student_resource/dataset')
+        if (fallback / 'train' / 'train_ground_truth.tsv').exists():
+            args.data = fallback
     if args.train_size < 8000:
         p.error('--train-size must be >= 8000 (original V5 train set)')
     if args.train_chunk < 1 or args.query_batch < 1:
@@ -215,8 +219,8 @@ def main():
     del xs,ys,X_base,y_base
     gc.collect()
     LOG.info('Initial training pairs %d; positives=%d; negatives=%d',len(y),int(y.sum()),int((y==0).sum()))
-    device='cuda' if dev.type=='cuda' else 'cpu'
-    baseline=v5.fit_xgb(X,y,device,650,args.cpu_threads)
+    device='cuda'
+    baseline=v5.fit_xgb(X,y,device,650,args.cpu_threads,stage_name="Scaled Baseline XGBoost")
     baseline_scored=score_validation(valid,valid_candidates,store,baseline,args.query_batch)
     base_tune,base_threshold=v5.tune({rid:pp for rid,pp in baseline_scored.items() if rid in tune_ids},truth)
     LOG.info('Scaled baseline: tuning F0.5=%.5f threshold=%.3f',base_tune,base_threshold)
@@ -239,7 +243,7 @@ def main():
         X2=np.concatenate([X,*neg_x]);y2=np.concatenate([y,*neg_y])
         del neg_x,neg_y
         LOG.info('Training refined model with %d pairs',len(y2))
-        refined=v5.fit_xgb(X2,y2,device,850,args.cpu_threads)
+        refined=v5.fit_xgb(X2,y2,device,850,args.cpu_threads,stage_name="Scaled Refined XGBoost (Hard Negatives)")
         del X2,y2
         gc.collect()
         refined_scored=score_validation(valid,valid_candidates,store,refined,args.query_batch)

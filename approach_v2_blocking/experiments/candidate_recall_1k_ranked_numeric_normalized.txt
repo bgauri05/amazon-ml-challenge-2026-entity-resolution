@@ -1,0 +1,33 @@
+================================================================================
+APPROACH V2: CANDIDATE RECALL EVALUATION REPORT (TUNED + RELEVANCE RANKING (NUMERIC NORMALIZED))
+================================================================================
+
+1. OVERALL METRICS:
+  - Total S1 Entities Evaluated          : 1,000
+  - S1 Entities with 0 GT Matches        : 54 (5.4%)
+  - S1 Entities with >=1 GT Matches      : 946
+  - Total Ground-Truth Positive Matches  : 3,517
+  - Total GT Matches Retrieved (Union)   : 2,839
+  - Total GT Matches Missed              : 678
+  - OVERALL CANDIDATE RECALL %           : 80.72%
+
+2. ENTITY-LEVEL RECALL BREAKDOWN (for S1 with >=1 GT link):
+  - ALL GT Matches Retrieved (Complete) : 604 entities (63.85%)
+  - PARTIAL GT Matches Retrieved        : 272 entities (28.75%)
+  - ZERO GT Matches Retrieved           : 70 entities (7.4%)
+
+3. KNOWN TRUNCATION CASE VERIFICATIONS:
+  - S1 [S1-748243940] -> GT [S3-749582950] : SUCCESSFULLY RETRIEVED IN TOP-100 (Passes: name_token)
+  - S1 [S1-666435696] -> GT [S3-211915957] : SUCCESSFULLY RETRIEVED IN TOP-100 (Passes: address_token,postal_code)
+
+4. PER-BLOCKING-PASS METRICS:
+  - Union of All Passes                 : 2,839 / 3,517 links (80.72%) | 876 S1 entities
+  - Rule [exact_name     ]          : 1,405 / 3,517 links (39.95%) | 728 S1 entities (76.96%)
+  - Rule [name_token     ]          : 1,164 / 3,517 links (33.1%) | 355 S1 entities (37.53%)
+  - Rule [address_token  ]          : 1,909 / 3,517 links (54.28%) | 588 S1 entities (62.16%)
+  - Rule [name_prefix    ]          : 325 / 3,517 links (9.24%) | 98 S1 entities (10.36%)
+  - Rule [char_ngram     ]          : 394 / 3,517 links (11.2%) | 126 S1 entities (13.32%)
+  - Rule [postal_code    ]          : 195 / 3,517 links (5.54%) | 67 S1 entities (7.08%)
+  - Rule [relaxed_token  ]          : 141 / 3,517 links (4.01%) | 42 S1 entities (4.44%)
+
+================================================================================

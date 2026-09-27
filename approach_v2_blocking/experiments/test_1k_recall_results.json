@@ -1,0 +1,31 @@
+{
+  "total_s1_entities": 1000,
+  "zero_gt_s1_entities": 54,
+  "active_gt_s1_entities": 946,
+  "total_gt_positive_links": 3517,
+  "union_gt_links_retrieved": 2086,
+  "overall_candidate_recall_pct": 59.31,
+  "entity_recall_breakdown": {
+    "all_gt_matches_retrieved": 286,
+    "partial_gt_matches_retrieved": 524,
+    "zero_gt_matches_retrieved": 136
+  },
+  "pass_recall_breakdown": {
+    "exact_name": {
+      "retrieved_gt_links": 1316,
+      "recall_pct": 37.42
+    },
+    "name_token": {
+      "retrieved_gt_links": 1021,
+      "recall_pct": 29.03
+    },
+    "address_token": {
+      "retrieved_gt_links": 1418,
+      "recall_pct": 40.32
+    },
+    "name_prefix": {
+      "retrieved_gt_links": 294,
+      "recall_pct": 8.36
+    }
+  }
+}

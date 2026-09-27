@@ -1,0 +1,60 @@
+================================================================================
+APPROACH V2: CANDIDATE RECALL EVALUATION REPORT (TUNED (7 PASSES))
+================================================================================
+
+1. OVERALL METRICS:
+  - Total S1 Entities Evaluated          : 1,000
+  - S1 Entities with 0 GT Matches        : 54 (5.4%)
+  - S1 Entities with >=1 GT Matches      : 946
+  - Total Ground-Truth Positive Matches  : 3,517
+  - Total GT Matches Retrieved (Union)   : 2,352
+  - OVERALL CANDIDATE RECALL %           : 66.88%
+
+2. ENTITY-LEVEL RECALL BREAKDOWN (for S1 with >=1 GT link):
+  - ALL GT Matches Retrieved (Complete) : 381 entities (40.27%)
+  - PARTIAL GT Matches Retrieved        : 453 entities (47.89%)
+  - ZERO GT Matches Retrieved           : 112 entities (11.84%)
+
+3. PER-BLOCKING-PASS METRICS:
+  - Union of All Passes                 : 2,352 / 3,517 links (66.88%) | 834 S1 entities
+  - Rule [exact_name     ]          : 1,353 / 3,517 links (38.47%) | 717 S1 entities (75.79%)
+  - Rule [name_token     ]          : 1,071 / 3,517 links (30.45%) | 347 S1 entities (36.68%)
+  - Rule [address_token  ]          : 1,576 / 3,517 links (44.81%) | 560 S1 entities (59.2%)
+  - Rule [name_prefix    ]          : 313 / 3,517 links (8.9%) | 98 S1 entities (10.36%)
+  - Rule [char_ngram     ]          : 375 / 3,517 links (10.66%) | 124 S1 entities (13.11%)
+  - Rule [postal_code    ]          : 179 / 3,517 links (5.09%) | 65 S1 entities (6.87%)
+  - Rule [relaxed_token  ]          : 140 / 3,517 links (3.98%) | 42 S1 entities (4.44%)
+
+4. QUALITATIVE FAILED / SUCCESS EXAMPLES:
+
+--- [A] FULL RECALL EXAMPLE (100% Matches Retrieved) ---
+S1 Entity ID : S1-755362802
+GT Matches   : ['S2-587230276', 'S3-440254853']
+Generated Candidates (Top 5):
+  - S2-125024888 (Passes: name_token)
+  - S2-141164638 (Passes: name_token)
+  - S2-157614385 (Passes: name_token)
+  - S2-193306634 (Passes: name_token)
+  - S2-222336648 (Passes: name_token)
+
+--- [B] PARTIAL RECALL EXAMPLE (Some Matches Missed) ---
+S1 Entity ID : S1-925783039
+GT Matches   : ['S2-157377754', 'S2-517291332', 'S3-698172821', 'S3-997698194']
+Retrieved    : ['S2-157377754', 'S2-517291332', 'S3-997698194']
+Missed       : ['S3-698172821']
+Generated Candidates (Top 5):
+  - S2-157377754 (Passes: address_token,exact_name,name_token)
+  - S3-997698194 (Passes: address_token,exact_name,name_token)
+  - S2-517291332 (Passes: address_token,name_token)
+  - S2-100198226 (Passes: name_token)
+  - S2-109148193 (Passes: address_token)
+
+--- [C] ZERO RECALL EXAMPLE (All True Matches Missed) ---
+S1 Entity ID : S1-865131206
+GT Matches   : ['S2-657355663', 'S3-219374335', 'S3-567734078', 'S3-652513823']
+Generated Candidates (Top 5):
+
+================================================================================
+RECOMMENDATION: C) REDESIGNED BEFORE SCALING
+Rationale: Recall remains below 70% (66.88%), requiring fundamental redesign.
+================================================================================

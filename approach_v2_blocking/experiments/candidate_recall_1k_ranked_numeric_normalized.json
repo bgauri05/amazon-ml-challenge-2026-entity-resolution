@@ -1,0 +1,84 @@
+{
+  "summary": {
+    "mode": "TUNED + RELEVANCE RANKING (NUMERIC NORMALIZED)",
+    "total_s1_entities_evaluated": 1000,
+    "s1_entities_with_zero_gt_matches": 54,
+    "s1_entities_with_active_gt_matches": 946,
+    "total_gt_positive_matches": 3517,
+    "total_gt_matches_retrieved": 2839,
+    "total_gt_matches_missed": 678,
+    "overall_candidate_recall_pct": 80.72,
+    "entity_recall_breakdown": {
+      "all_gt_matches_retrieved_count": 604,
+      "all_gt_matches_retrieved_pct": 63.85,
+      "partial_gt_matches_retrieved_count": 272,
+      "partial_gt_matches_retrieved_pct": 28.75,
+      "zero_gt_matches_retrieved_count": 70,
+      "zero_gt_matches_retrieved_pct": 7.4
+    }
+  },
+  "target_verifications": [
+    {
+      "s1_entity_id": "S1-748243940",
+      "target_candidate_id": "S3-749582950",
+      "retrieved_in_top100": true,
+      "blocking_passes": "name_token"
+    },
+    {
+      "s1_entity_id": "S1-666435696",
+      "target_candidate_id": "S3-211915957",
+      "retrieved_in_top100": true,
+      "blocking_passes": "address_token,postal_code"
+    }
+  ],
+  "per_blocking_pass": {
+    "exact_name": {
+      "retrieved_gt_links": 1405,
+      "recall_pct": 39.95,
+      "s1_entities_with_at_least_one_true_match": 728,
+      "s1_entities_pct": 76.96
+    },
+    "name_token": {
+      "retrieved_gt_links": 1164,
+      "recall_pct": 33.1,
+      "s1_entities_with_at_least_one_true_match": 355,
+      "s1_entities_pct": 37.53
+    },
+    "address_token": {
+      "retrieved_gt_links": 1909,
+      "recall_pct": 54.28,
+      "s1_entities_with_at_least_one_true_match": 588,
+      "s1_entities_pct": 62.16
+    },
+    "name_prefix": {
+      "retrieved_gt_links": 325,
+      "recall_pct": 9.24,
+      "s1_entities_with_at_least_one_true_match": 98,
+      "s1_entities_pct": 10.36
+    },
+    "char_ngram": {
+      "retrieved_gt_links": 394,
+      "recall_pct": 11.2,
+      "s1_entities_with_at_least_one_true_match": 126,
+      "s1_entities_pct": 13.32
+    },
+    "postal_code": {
+      "retrieved_gt_links": 195,
+      "recall_pct": 5.54,
+      "s1_entities_with_at_least_one_true_match": 67,
+      "s1_entities_pct": 7.08
+    },
+    "relaxed_token": {
+      "retrieved_gt_links": 141,
+      "recall_pct": 4.01,
+      "s1_entities_with_at_least_one_true_match": 42,
+      "s1_entities_pct": 4.44
+    }
+  },
+  "union_all_passes": {
+    "total_gt_retrieved": 2839,
+    "overall_recall_pct": 80.72,
+    "s1_entities_with_at_least_one_true_match": 876,
+    "s1_entities_pct": 92.6
+  }
+}

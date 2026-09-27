@@ -12,9 +12,12 @@ import gc
 import logging
 import os
 import re
+import time
 from collections import Counter, defaultdict
 from pathlib import Path
 
+import sqlite3
+from concurrent.futures import ThreadPoolExecutor
 import faiss
 import joblib
 import numpy as np
@@ -94,10 +97,21 @@ def extra_features(a, b, similarity):
 
 
 class ExpandedStore(BASE_STORE):
-    """Reuse cached V4 full-corpus indexes and add independent alternate FTS probes."""
+    """Reuse cached V4 full-corpus indexes and add independent alternate FTS probes with multithreaded SQLite access."""
     extras_per_probe = 75
     extra_cap = 750
     extra_enabled = True
+
+    def __init__(self, db_path, dim, cpu_threads=12, *args, **kwargs):
+        super().__init__(db_path, dim, *args, **kwargs)
+        self.db_path = Path(db_path)
+        self.cpu_threads = cpu_threads
+
+    def _get_conn(self):
+        conn = sqlite3.connect(str(self.db_path))
+        conn.execute("PRAGMA journal_mode=WAL")
+        conn.execute("PRAGMA query_only=ON")
+        return conn
 
     @staticmethod
     def probes(r):
@@ -107,7 +121,6 @@ class ExpandedStore(BASE_STORE):
                 if len(t) >= 3 and t not in ADDR_STOP]
         nums = [s for s in re.findall(r'\d+', r[2]) if len(s) >= 2]
         p = []
-        # V4 mainly probes the two longest tokens. Test *different* combinations.
         if len(name) >= 2:
             p.append(('name', name[0], name[-1]))
             p.append(('name', name[-2], name[-1]))
@@ -120,7 +133,6 @@ class ExpandedStore(BASE_STORE):
             p.append(('addr', nums[-1], addr[-1]))
         if len(addr) >= 3:
             p.append(('addr', addr[1], addr[2]))
-        # Distinct queries only. Two-stage name/address retrieval is deliberate.
         seen = set()
         for field, t1, t2 in p:
             if t1 == t2:
@@ -130,65 +142,184 @@ class ExpandedStore(BASE_STORE):
                 seen.add(key)
                 yield key
 
-    def alternate_fts(self, records):
-        results = [[] for _ in records]
-        cache = {}
-        stmt = ('SELECT t.id,t.name,t.addr FROM targets_fts '
+    def fts_candidates_parallel(self, records, per_probe=55):
+        """Multithreaded FTS primary probes selecting pre-computed keys from SQLite."""
+        sql = ("SELECT t.id,t.name,t.addr,t.name_key,t.addr_key FROM targets_fts "
+               "JOIN targets t ON t.rowid=targets_fts.rowid "
+               "WHERE targets_fts MATCH ? AND t.country=? "
+               "ORDER BY bm25(targets_fts) LIMIT ?")
+
+        def process_rec(r, conn):
+            name_tokens = sorted({t for t in re.findall(r'[a-z0-9]+', v4.name_key(r[1]))
+                                  if len(t) >= 4 and t not in ADDR_STOP | NAME_STOP},
+                                 key=lambda x: (-len(x), x))[:4]
+            addr_tokens = sorted({t for t in re.findall(r'[a-z0-9]+', v4.addr_key(r[2]))
+                                  if len(t) >= 4 and t not in ADDR_STOP | NAME_STOP},
+                                 key=lambda x: (-len(x), x))[:4]
+            numbers = [x for x in re.findall(r'\d+', r[2]) if len(x) >= 2]
+            probes = []
+            for field, tokens in (('name', name_tokens), ('addr', addr_tokens)):
+                if len(tokens) >= 2: probes.append((field, tokens[:2]))
+                if tokens and len(tokens[0]) >= 5: probes.append((field, tokens[:1]))
+                if field == 'addr' and numbers and tokens: probes.append((field, [numbers[0], tokens[0]]))
+            by_field = {'name': [], 'addr': []}
+            rec_ak = v4.addr_key(r[2])
+            rec_nk = v4.name_key(r[1])
+            for field, tokens in probes[:5]:
+                expr = ' AND '.join(f'{field}:"{t}"' for t in tokens)
+                found = conn.execute(sql, (expr, r[3], per_probe * 3)).fetchall()
+                if len(found) > per_probe:
+                    if field == 'name':
+                        found = sorted(found, key=lambda x: fuzz.WRatio(rec_ak, x[4]), reverse=True)[:per_probe]
+                    else:
+                        found = sorted(found, key=lambda x: fuzz.WRatio(rec_nk, x[3]), reverse=True)[:per_probe]
+                by_field[field].extend((cid, -1.0) for cid, _, _, _, _ in found)
+            rec_res = []
+            n = max(len(by_field['name']), len(by_field['addr']))
+            for j in range(n):
+                for field in ('name', 'addr'):
+                    if j < len(by_field[field]):
+                        rec_res.append(by_field[field][j])
+            return rec_res
+
+        def worker_chunk(chunk):
+            conn = self._get_conn()
+            res = [process_rec(r, conn) for r in chunk]
+            conn.close()
+            return res
+
+        workers = getattr(self, 'cpu_threads', 12)
+        chunk_size = max(1, len(records) // workers)
+        chunks = [records[i:i + chunk_size] for i in range(0, len(records), chunk_size)]
+        results = []
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            for chunk_res in executor.map(worker_chunk, chunks):
+                results.extend(chunk_res)
+        return results
+
+    def alternate_fts_parallel(self, records):
+        """Multithreaded alternate FTS probes selecting pre-computed keys from SQLite."""
+        stmt = ('SELECT t.id,t.name,t.addr,t.name_key,t.addr_key FROM targets_fts '
                 'JOIN targets t ON t.rowid=targets_fts.rowid '
                 'WHERE targets_fts MATCH ? AND t.country=? '
                 'ORDER BY bm25(targets_fts) LIMIT ?')
-        for i, r in enumerate(records):
+
+        def process_rec(r, conn):
             name_hits, addr_hits = [], []
             probes = list(self.probes(r))[:7]
+            rec_ak = v4.addr_key(r[2])
+            rec_nk = v4.name_key(r[1])
             for field, tokens in probes:
                 q = ' AND '.join(f'{field}:"{t}"' for t in tokens)
-                key = (q, r[3])
-                if key not in cache:
-                    cache[key] = self.conn.execute(stmt, (q, r[3], self.extras_per_probe*2)).fetchall()
-                hits = cache[key]
-                if field == 'name':
-                    # On ambiguous name tokens, use opposite (address) evidence.
-                    hits = sorted(hits, key=lambda x: (fuzz.WRatio(v4.addr_key(r[2]),v4.addr_key(x[2])),
-                                                             fuzz.WRatio(v4.name_key(r[1]),v4.name_key(x[1]))),
-                                  reverse=True)[:self.extras_per_probe]
-                    name_hits.extend(x[0] for x in hits)
-                else:
-                    hits = sorted(hits, key=lambda x: (fuzz.WRatio(v4.name_key(r[1]),v4.name_key(x[1])),
-                                                             fuzz.WRatio(v4.addr_key(r[2]),v4.addr_key(x[2]))),
-                                  reverse=True)[:self.extras_per_probe]
-                    addr_hits.extend(x[0] for x in hits)
-            # Round-robin so one field cannot monopolize the candidate budget.
-            for j in range(max(len(name_hits),len(addr_hits))):
+                hits = conn.execute(stmt, (q, r[3], self.extras_per_probe * 2)).fetchall()
+                if hits:
+                    if field == 'name':
+                        hits = sorted(hits, key=lambda x: (fuzz.WRatio(rec_ak, x[4]),
+                                                         fuzz.WRatio(rec_nk, x[3])),
+                                      reverse=True)[:self.extras_per_probe]
+                        name_hits.extend(x[0] for x in hits)
+                    else:
+                        hits = sorted(hits, key=lambda x: (fuzz.WRatio(rec_nk, x[3]),
+                                                         fuzz.WRatio(rec_ak, x[4])),
+                                      reverse=True)[:self.extras_per_probe]
+                        addr_hits.extend(x[0] for x in hits)
+            rec_res = []
+            for j in range(max(len(name_hits), len(addr_hits))):
                 if j < len(name_hits):
-                    results[i].append(name_hits[j])
+                    rec_res.append(name_hits[j])
                 if j < len(addr_hits):
-                    results[i].append(addr_hits[j])
-            if len(cache) > 10000:
-                cache.clear()
+                    rec_res.append(addr_hits[j])
+            return rec_res
+
+        def worker_chunk(chunk):
+            conn = self._get_conn()
+            res = [process_rec(r, conn) for r in chunk]
+            conn.close()
+            return res
+
+        workers = getattr(self, 'cpu_threads', 12)
+        chunk_size = max(1, len(records) // workers)
+        chunks = [records[i:i + chunk_size] for i in range(0, len(records), chunk_size)]
+        results = []
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            for chunk_res in executor.map(worker_chunk, chunks):
+                results.extend(chunk_res)
         return results
 
     def retrieve(self, records, encoder, top_k):
-        base = super().retrieve(records, encoder, top_k)
-        if not self.extra_enabled:
-            return base
-        new = self.alternate_fts(records)
-        for i, row in enumerate(base):
-            known = {cid for cid, _ in row}
-            for cid in new[i]:
-                if len(row) >= self.extra_cap:
-                    break
-                if cid not in known:
-                    row.append((cid,-1.0))
-                    known.add(cid)
-        return base
+        output = [[] for _ in records]
+        vectors = encoder.transform(records)
+        grouped = defaultdict(list)
+        for i, r in enumerate(records):
+            grouped[r[3]].append(i)
+        for country, positions in grouped.items():
+            q = np.ascontiguousarray(vectors[positions], dtype=np.float32)
+            for source in (2, 3):
+                key = (source, country)
+                if key not in self.indexes or self.indexes[key].ntotal == 0:
+                    continue
+                count = min(top_k, self.indexes[key].ntotal)
+                scores, labels = self.indexes[key].search(q, count)
+                ids = self.ids[key]
+                for local_i, original_i in enumerate(positions):
+                    matches = []
+                    for label, score in zip(labels[local_i], scores[local_i]):
+                        if label < 0:
+                            continue
+                        matches.append((ids[int(label)], float(score)))
+                    output[original_i].extend(matches)
+
+        exact = self.exact_candidates(records, cap=self.exact_cap)
+        lexical = self.fts_candidates_parallel(records, per_probe=self.fts_per_probe)
+
+        for i, extra in enumerate(exact):
+            extra.extend(lexical[i])
+            existing = {cid for cid, _ in output[i]}
+            for cid, _ in extra:
+                if cid not in existing:
+                    output[i].append((cid, -1.0))
+                    existing.add(cid)
+            if self.max_candidates > 0:
+                output[i] = output[i][:max(self.max_candidates, 2 * top_k)]
+
+        if self.extra_enabled:
+            new_fts = self.alternate_fts_parallel(records)
+            for i, row in enumerate(output):
+                known = {cid for cid, _ in row}
+                for cid in new_fts[i]:
+                    if len(row) >= self.extra_cap:
+                        break
+                    if cid not in known:
+                        row.append((cid, -1.0))
+                        known.add(cid)
+        return output
 
 
-def fit_xgb(X, y, device, n_estimators, threads):
+def format_progress(stage: str, current: int, total: int, start_time: float, extra: str = "") -> str:
+    elapsed = time.time() - start_time
+    rate = current / max(1e-5, elapsed)
+    remaining = (total - current) / max(1e-5, rate) if current > 0 else 0
+    pct = (current / total) * 100 if total > 0 else 100.0
+    elapsed_str = time.strftime("%H:%M:%S", time.gmtime(elapsed))
+    eta_str = time.strftime("%H:%M:%S", time.gmtime(remaining))
+    msg = f"[{time.strftime('%H:%M:%S')}] [{stage}] {current}/{total} ({pct:.1f}%) | Elapsed: {elapsed_str} | ETA: {eta_str} | {rate:.1f} rec/s"
+    if extra:
+        msg += f" | {extra}"
+    return msg
+
+
+def fit_xgb(X, y, device, n_estimators, threads, stage_name="Baseline XGBoost"):
+    print(f"[{time.strftime('%H:%M:%S')}] [STAGE: {stage_name}] Starting GPU XGBoost training (tree_method='hist', device='cuda') on {len(y)} pairs (Pos: {int(y.sum())}, Neg: {int((y==0).sum())})...", flush=True)
+    LOG.info("Starting %s GPU training (tree_method='hist', device='cuda')", stage_name)
+    t0 = time.time()
     model = xgb.XGBClassifier(n_estimators=n_estimators, max_depth=8,
         learning_rate=.045, min_child_weight=2, reg_lambda=5, subsample=.85,
-        colsample_bytree=.90, tree_method='hist', device=device,
+        colsample_bytree=.90, tree_method='hist', device='cuda',
         eval_metric='logloss', random_state=SEED, n_jobs=threads)
     model.fit(X, y, verbose=False)
+    elapsed = time.time() - t0
+    print(f"[{time.strftime('%H:%M:%S')}] [STAGE: {stage_name}] Finished GPU XGBoost training in {elapsed:.2f}s", flush=True)
+    LOG.info("Finished %s GPU training in %.2fs", stage_name, elapsed)
     model.set_params(device='cpu')
     return model
 
@@ -218,6 +349,8 @@ def mine_negatives(records, candidates, truth, store, model, per_entity=10, batc
     xx=[]
     yy=[]
     total=len(records)
+    t_start = time.time()
+    print(f"[{time.strftime('%H:%M:%S')}] [STAGE: Hard-Negative Mining] Starting mining across {total} S1 records...", flush=True)
     for start in range(0,total,batch_size):
         rr = records[start:start+batch_size]
         cc = candidates[start:start+batch_size]
@@ -240,8 +373,10 @@ def mine_negatives(records, candidates, truth, store, model, per_entity=10, batc
             if b is not None:
                 xx.append(extra_features(r,b,sim_by_id[r[0]][cid]))
                 yy.append(0)
-        LOG.info('Hard-negative mining %d / %d S1; %d extra negatives',
-                 min(total,start+len(rr)), total,len(yy))
+        curr = min(total, start + len(rr))
+        msg = format_progress("Hard-Neg Mining", curr, total, t_start, f"Mined: {len(yy)} negs")
+        print(msg, flush=True)
+        LOG.info(msg)
     return np.asarray(xx,dtype=np.float32),np.asarray(yy,dtype=np.int8)
 
 
@@ -280,8 +415,9 @@ def diagnostic(scored, records, candidates, truth, store, threshold, output):
 
 def main():
     parser=argparse.ArgumentParser(description='Experimental V5 using cached V4 indexes')
-    parser.add_argument('--data',type=Path,default=Path('student_resource/dataset'))
-    parser.add_argument('--sample',type=int,default=10000)
+    parser.add_argument('--data',type=Path,default=Path('student_resource/student_resource/dataset'))
+    parser.add_argument('--sample',type=int,default=0,
+                        help='Sample size (0 or negative loads ALL available S1 training records)')
     parser.add_argument('--top-k',type=int,default=40)
     parser.add_argument('--dim',type=int,default=64)
     parser.add_argument('--svd-samples',type=int,default=60000)
@@ -299,6 +435,10 @@ def main():
     parser.add_argument('--candidate-cache',action='store_true',
                         help='Save/load candidate lists for this exact configuration/sample')
     args=parser.parse_args()
+    if not (args.data / 'train' / 'train_ground_truth.tsv').exists():
+        fallback = Path('student_resource/student_resource/dataset')
+        if (fallback / 'train' / 'train_ground_truth.tsv').exists():
+            args.data = fallback
     logging.basicConfig(level=logging.INFO,format='%(asctime)s %(levelname)s %(message)s')
     faiss.omp_set_num_threads(args.cpu_threads)
     torch.set_num_threads(args.cpu_threads)
@@ -328,20 +468,46 @@ def main():
     store=ExpandedStore(db,args.dim,ef_search=192,cache_dir=work/f'train_indexes_d{args.dim}_s{args.svd_samples}',
          max_candidates=args.max_candidates,exact_cap=70,fts_per_probe=args.fts_per_probe)
     store.build(args.data,'train',encoder)
-    sampled=v4.sample_records(v4.source_path(args.data,'train',1),args.sample)
+    if args.sample and args.sample > 0:
+        print(f"[{time.strftime('%H:%M:%S')}] [Dataset] Sampling {args.sample} S1 records from disk...", flush=True)
+        sampled=v4.sample_records(v4.source_path(args.data,'train',1),args.sample)
+    else:
+        print(f"[{time.strftime('%H:%M:%S')}] [Dataset] Loading ALL available S1 training records from disk...", flush=True)
+        sampled=list(v4.iter_records(v4.source_path(args.data,'train',1)))
     train,valid=train_test_split(sampled,test_size=.2,random_state=SEED)
+    
+    s1_count = len(sampled)
+    s2_count = store.conn.execute("SELECT COUNT(*) FROM targets WHERE source=2").fetchone()[0]
+    s3_count = store.conn.execute("SELECT COUNT(*) FROM targets WHERE source=3").fetchone()[0]
+    
+    print("\n================================================", flush=True)
+    print("FULL DATASET RUN", flush=True)
+    print("================================================", flush=True)
+    print(f"S1 training records: {s1_count:,}", flush=True)
+    print(f"S2 training records: {s2_count:,}", flush=True)
+    print(f"S3 training records: {s3_count:,}", flush=True)
+    print("\nCandidate retrieval: processing ALL S1 training records", flush=True)
+    print("================================================\n", flush=True)
+    
+    LOG.info("Full Dataset Run | S1: %d, S2: %d, S3: %d", s1_count, s2_count, s3_count)
     truth=v4.read_truth(args.data/'train'/'train_ground_truth.tsv')
     key=f's{args.sample}_k{args.top_k}_m{args.max_candidates}_e{args.extra_cap}_p{args.extra_probe_results}_x{int(ExpandedStore.extra_enabled)}'
     def load_candidates(split_name,rr):
         p=out/f'{split_name}_candidates_{key}.joblib'
         if args.candidate_cache and p.exists():
+            print(f"[{time.strftime('%H:%M:%S')}] [Candidate Retrieval] Loading {split_name} cached candidates from disk ({len(rr)} S1)", flush=True)
             LOG.info('Loading %s cached candidates',split_name)
             return joblib.load(p)
+        print(f"[{time.strftime('%H:%M:%S')}] [Candidate Retrieval] Starting {split_name} retrieval for {len(rr)} S1 records...", flush=True)
         LOG.info('Retrieving %s candidates (%d S1)',split_name,len(rr))
         found=[]
+        t_start = time.time()
         for start in range(0,len(rr),args.query_batch):
-            found += store.retrieve(rr[start:start+args.query_batch],encoder,args.top_k)
-            LOG.info('%s retrieval %d/%d',split_name,min(len(rr),start+args.query_batch),len(rr))
+            stop = min(len(rr), start + args.query_batch)
+            found += store.retrieve(rr[start:stop],encoder,args.top_k)
+            msg = format_progress(f"Retrieval:{split_name}", stop, len(rr), t_start)
+            print(msg, flush=True)
+            LOG.info(msg)
         if args.candidate_cache:
             joblib.dump(found,p,compress=0)
         return found
@@ -356,22 +522,28 @@ def main():
         LOG.info('Retrieval-only experiment finished; classifier not trained')
         store.close()
         return
+    print(f"[{time.strftime('%H:%M:%S')}] [STAGE 2: Feature Matrix] Building feature matrices...", flush=True)
     X,y=v4.training_arrays(train,tr_candidates,truth,store,max_neg=24)
     LOG.info('Initial training pairs: %d (positives %d, negatives %d)',len(y),int(y.sum()),int((y==0).sum()))
-    device='cuda' if dev.type=='cuda' else 'cpu'
-    baseline=fit_xgb(X,y,device,650,args.cpu_threads)
+    device='cuda'
+    baseline=fit_xgb(X,y,device,650,args.cpu_threads,stage_name="Baseline XGBoost")
     # Split the V4 validation population: tuning and a distinct, untouched report subset.
     tune_refs,report_refs=train_test_split(valid,test_size=.50,random_state=SEED+1)
     tune_ids={r[0] for r in tune_refs}
     report_ids={r[0] for r in report_refs}
-    def score_validation(model):
+    def score_validation(model, stage_name="Validation Scoring"):
         data={}
+        t_start = time.time()
+        print(f"[{time.strftime('%H:%M:%S')}] [{stage_name}] Scoring {len(valid)} validation entities...", flush=True)
         for st in range(0,len(valid),args.query_batch):
-            data.update(v4.score_batch(valid[st:st+args.query_batch],
-                     vl_candidates[st:st+args.query_batch],store,model))
-            LOG.info('Validation scoring %d/%d',min(len(valid),st+args.query_batch),len(valid))
+            stop = min(len(valid), st + args.query_batch)
+            data.update(v4.score_batch(valid[st:stop],
+                     vl_candidates[st:stop],store,model))
+            msg = format_progress(stage_name, stop, len(valid), t_start)
+            print(msg, flush=True)
+            LOG.info(msg)
         return data
-    baseline_scores=score_validation(baseline)
+    baseline_scores=score_validation(baseline, stage_name="Validation Scoring (Baseline)")
     tune_base={rid:p for rid,p in baseline_scores.items() if rid in tune_ids}
     bscore,bthreshold=tune(tune_base,truth)
     LOG.info('Baseline: tuning macro F0.5=%.5f threshold=%.3f',bscore,bthreshold)
@@ -387,10 +559,11 @@ def main():
             y2=np.concatenate([y,yy],axis=0)
             del xx,yy
             gc.collect()
-            refined=fit_xgb(X2,y2,device,850,args.cpu_threads)
+            print(f"[{time.strftime('%H:%M:%S')}] [STAGE 5: Refined Model] Assembling updated training array ({len(y2)} pairs)...", flush=True)
+            refined=fit_xgb(X2,y2,device,850,args.cpu_threads,stage_name="Refined XGBoost (Hard Negatives)")
             del X2,y2
             gc.collect()
-            refined_scores=score_validation(refined)
+            refined_scores=score_validation(refined, stage_name="Validation Scoring (Refined)")
             rscore,rthreshold=tune({rid:p for rid,p in refined_scores.items() if rid in tune_ids},truth)
             LOG.info('Mined model: tuning macro F0.5=%.5f threshold=%.3f',rscore,rthreshold)
             if rscore>bscore:
